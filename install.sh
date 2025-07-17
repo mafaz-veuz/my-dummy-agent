@@ -2,26 +2,32 @@
 
 echo "Installing Dummy Agent..."
 
-# Update this link to match your GitHub username and repo
-DEB_URL="https://raw.githubusercontent.com/mafaz-veuz/my-dummy-agent/main/dummyagent_1.0_all.deb"
-DEB_FILE="/tmp/dummyagent.deb"
+# ✅ Expect organizationId from the environment
+if [ -z "$organizationId" ]; then
+    echo "❌ Error: organizationId is not set."
+    exit 1
+fi
 
-# Download .deb file
-echo "Downloading dummyagent package..."
-curl -L --progress-bar "$DEB_URL" -o "$DEB_FILE"
+# Create target directory
+sudo mkdir -p /usr/lib/DummyAgent
 
-# Install it
-echo "Installing package..."
-sudo dpkg -i "$DEB_FILE"
+# Download and install binary (or copy from current if local)
+curl -fsSL "$base/DummyAgent" -o /tmp/DummyAgent
+sudo mv /tmp/DummyAgent /usr/lib/DummyAgent/DummyAgent
+sudo chmod +x /usr/lib/DummyAgent/DummyAgent
 
-# Fix any dependencies
-sudo apt-get install -f -y
+# Create config.json with organizationId
+echo "{ \"organizationId\": \"$organizationId\" }" | sudo tee /usr/lib/DummyAgent/config.json > /dev/null
+sudo chmod 644 /usr/lib/DummyAgent/config.json
 
-# Enable and start the service
-echo "Enabling and starting dummyagent service..."
+# Download and install service file
+curl -fsSL "$base/dummyagent.service" -o /tmp/dummyagent.service
+sudo mv /tmp/dummyagent.service /lib/systemd/system/dummyagent.service
+sudo chmod 644 /lib/systemd/system/dummyagent.service
+
+# Start service
 sudo systemctl daemon-reload
 sudo systemctl enable dummyagent.service
 sudo systemctl start dummyagent.service
 
-echo "✅ Dummy Agent installed and running!"
-
+echo "✅ Dummy Agent installed and running with Org ID: $organizationId"
