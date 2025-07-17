@@ -1,17 +1,27 @@
 #!/bin/bash
+
 echo "Installing Dummy Agent..."
 
-# Copy binary and service file
-sudo mkdir -p /usr/lib/DummyAgent
-sudo cp DummyAgent /usr/lib/DummyAgent/
-sudo chmod +x /usr/lib/DummyAgent/DummyAgent
+# Update this link to match your GitHub username and repo
+DEB_URL="https://raw.githubusercontent.com/mafaz-veuz/my-dummy-agent/main/dummyagent_1.0_all.deb"
+DEB_FILE="/tmp/dummyagent.deb"
 
-sudo cp dummyagent.service /lib/systemd/system/
-sudo chmod 644 /lib/systemd/system/dummyagent.service
+# Download .deb file
+echo "Downloading dummyagent package..."
+curl -L --progress-bar "$DEB_URL" -o "$DEB_FILE"
 
-# Enable + Start
+# Install it
+echo "Installing package..."
+sudo dpkg -i "$DEB_FILE"
+
+# Fix any dependencies
+sudo apt-get install -f -y
+
+# Enable and start the service
+echo "Enabling and starting dummyagent service..."
 sudo systemctl daemon-reload
 sudo systemctl enable dummyagent.service
 sudo systemctl start dummyagent.service
 
-echo "Dummy Agent Installed & Running."
+echo "✅ Dummy Agent installed and running!"
+
