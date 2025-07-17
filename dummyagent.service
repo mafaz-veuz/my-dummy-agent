@@ -1,0 +1,11 @@
+[Unit]
+Description=Dummy Agent Service
+
+[Service]
+ExecStart=/usr/lib/DummyAgent/DummyAgent
+Restart=always
+User=root
+Group=root
+
+[Install]
+WantedBy=multi-user.target
